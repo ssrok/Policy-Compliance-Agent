@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     # Database Configuration
     DATABASE_URL: str | None = os.getenv("DATABASE_URL")
     
+    # Upload configuration
+    UPLOAD_DIR: str = os.path.join(BASE_DIR, "uploads")
+    
     class Config:
         env_file = env_path
         case_sensitive = True
@@ -23,4 +26,5 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-print("Loaded DATABASE_URL:", settings.DATABASE_URL)
+# Ensure upload directory exists
+os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
