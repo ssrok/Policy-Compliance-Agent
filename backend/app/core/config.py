@@ -2,9 +2,10 @@ import os
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
-# Ensure we load from the backend directory
+# BASE_DIR = backend/ folder, .env lives here
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-env_path = os.path.join(BASE_DIR, ".env")
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env_path = os.path.join(BACKEND_DIR, ".env")
 load_dotenv(env_path)
 
 class Settings(BaseSettings):
@@ -15,6 +16,8 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: list[str] = ["*"]
     # Database Configuration
     DATABASE_URL: str | None = os.getenv("DATABASE_URL")
+    # OpenAI
+    OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY")
     
     # Upload configuration
     UPLOAD_DIR: str = os.path.join(BASE_DIR, "uploads")

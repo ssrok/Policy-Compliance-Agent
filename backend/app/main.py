@@ -34,6 +34,9 @@ def get_application() -> FastAPI:
     
     from app.api.routes import policy_routes
     app.include_router(policy_routes.router, prefix=f"{settings.API_V1_STR}/policy", tags=["policy"])
+
+    from app.api.routes import rule_routes
+    app.include_router(rule_routes.router, prefix=f"{settings.API_V1_STR}/rules", tags=["rules"])
     
     return app
 
