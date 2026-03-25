@@ -4,7 +4,7 @@ from app.core.config import settings
 from app.api.routes import health, user_routes
 from app.db.base import Base
 from app.db.session import engine
-from app.models import user  # Ensure models are imported
+import app.models  # Ensure models are imported for metadata registration
 
 def get_application() -> FastAPI:
     # Create tables automatically
