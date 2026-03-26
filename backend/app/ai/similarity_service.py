@@ -5,7 +5,7 @@ AI Service responsible for computing semantic similarity between rule fields
 and dataset columns using vector embeddings.
 """
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from app.ai.embedding_service import get_embedding, get_batch_embeddings

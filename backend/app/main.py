@@ -46,6 +46,9 @@ def get_application() -> FastAPI:
     
     from app.api.routes import compliance_routes
     app.include_router(compliance_routes.router, prefix=f"{settings.API_V1_STR}/compliance", tags=["compliance"])
+
+    from app.api.routes import report_routes
+    app.include_router(report_routes.router, prefix=f"{settings.API_V1_STR}/report", tags=["report"])
     
     return app
 

@@ -5,7 +5,14 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
+# Lazy client — initialized on first use so startup doesn't fail if key is missing
+_client = None
+
+def _get_client() -> OpenAI:
+    global _client
+    if _client is None:
+        _client = OpenAI(api_key=settings.OPENAI_API_KEY)
+    return _client
 
 SYSTEM_PROMPT = """You are a compliance rule extraction engine.
 Given a policy clause, extract a structured rule in JSON.
@@ -26,7 +33,7 @@ def extract_rule_from_clause(clause: str) -> dict:
     Returns a dict with all null fields if extraction fails.
     """
     try:
-        response = client.chat.completions.create(
+        response = _get_client().chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
