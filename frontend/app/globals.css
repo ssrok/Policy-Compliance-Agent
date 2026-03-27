@@ -65,3 +65,91 @@
 .gradient-text {
   @apply bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary/80 to-accent;
 }
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.fade-in {
+  animation-name: fadeIn;
+}
+
+.slide-in-from-bottom-5 {
+  animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.slide-in-from-bottom-10 {
+  animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.slide-in-from-bottom-12 {
+  animation: slideInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.shake-in {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.98); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.05), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.hover-bounce:hover {
+  animation: bounce-subtle 0.6s ease-in-out infinite;
+}
+
+.page-transition {
+  animation: fadeIn 0.4s ease-out, slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.success-badge {
+  @apply bg-green-50 text-green-600 border border-green-100 flex items-center space-x-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-100/50;
+  animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.empty-state-glow {
+  @apply relative;
+}
+
+.empty-state-glow::after {
+  content: '';
+  @apply absolute -inset-10 bg-indigo-100/20 blur-[100px] rounded-full -z-10;
+}
