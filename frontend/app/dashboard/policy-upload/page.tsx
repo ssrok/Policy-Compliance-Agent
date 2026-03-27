@@ -1,114 +1,132 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useDashboard } from "@/lib/context/dashboard-context";
-import { 
-  FileText, 
-  Upload, 
-  ChevronRight, 
-  CheckCircle2, 
-  AlertCircle 
-} from "lucide-react";
+import { FileText, Upload, ChevronRight, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function PolicyUploadPage() {
-  const { 
-    policyState,
-    handlePolicyChange, 
-    handleExtractPolicy 
-  } = useDashboard();
+  const { policyState, handlePolicyChange, handleExtractPolicy } = useDashboard();
   const { file: policyFile, clauses, loading: loadingPolicy, error: policyError } = policyState;
+  const [showAllClauses, setShowAllClauses] = useState(false);
+  const visibleClauses = showAllClauses ? clauses : clauses.slice(0, 10);
 
   return (
-    <div className="space-y-12 animate-in slide-in-from-bottom-5 duration-700">
-      <div className="text-center space-y-4">
-        <h1 className="text-5xl font-black uppercase tracking-tighter italic">Policy <span className="text-indigo-600">Ingestion</span></h1>
-        <p className="text-gray-400 max-w-lg mx-auto font-medium font-mono uppercase tracking-widest text-[10px]">Step 01: Extract compliance rules from PDF documents</p>
+    <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+          <span>Dashboard</span>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-indigo-400">Policy Analysis</span>
+        </div>
+        <h1 className="text-2xl font-bold text-white">Policy Analysis</h1>
+        <p className="text-sm text-gray-500 mt-1">Step 01 — Extract compliance rules from PDF documents</p>
       </div>
 
-      <div className="bg-white rounded-[40px] shadow-2xl shadow-indigo-100/50 p-16 border border-indigo-50 flex flex-col items-center text-center space-y-10 group">
-         <div className={`p-8 rounded-[32px] transition-all transform group-hover:scale-110 duration-500 ${policyFile ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-200'}`}>
-            <Upload className="w-16 h-16" />
-         </div>
-         
-         <div className="space-y-4 w-full max-w-md">
-            <h2 className="text-3xl font-black uppercase tracking-tight italic">Select Policy Document</h2>
-            <p className="text-gray-400 font-medium">Upload a PDF file containing your enterprise data policies (e.g., retention, audit, security).</p>
-         </div>
+      {/* Upload Card */}
+      <div className="bg-[#111827] border border-white/5 rounded-xl p-8">
+        <div className="flex flex-col items-center text-center space-y-6 max-w-md mx-auto">
+          <div className={`p-5 rounded-2xl transition-all duration-300 ${policyFile ? "bg-indigo-600/20 border border-indigo-500/30" : "bg-white/5 border border-white/10"}`}>
+            <Upload className={`w-10 h-10 ${policyFile ? "text-indigo-400" : "text-gray-600"}`} />
+          </div>
 
-         <div className="flex flex-col items-center w-full space-y-6">
-            <label className="cursor-pointer transform active:scale-95 transition-all w-full max-w-sm">
-               <span className="block bg-black text-white px-8 py-6 rounded-3xl text-sm font-black uppercase tracking-[0.2em] shadow-2xl shadow-black/20 hover:scale-[1.02] transition-all"> 
-                  {policyFile ? 'Change PDF File' : 'Select PDF File'} 
-               </span>
-               <input type="file" accept=".pdf" className="hidden" onChange={handlePolicyChange} />
-            </label>
-            
-            {policyFile && (
-              <div className="flex items-center space-x-3 px-6 py-3 bg-indigo-50 rounded-2xl border border-indigo-100 animate-in fade-in duration-500">
-                 <FileText className="w-4 h-4 text-indigo-500" />
-                 <span className="text-xs font-black text-indigo-600 uppercase tracking-tighter">{policyFile.name}</span>
-                 <CheckCircle2 className="w-4 h-4 text-indigo-400 ml-2" />
-              </div>
+          <div>
+            <h2 className="text-base font-semibold text-white">Select Policy Document</h2>
+            <p className="text-xs text-gray-500 mt-1">Upload a PDF containing your enterprise data policies</p>
+          </div>
+
+          <label className="cursor-pointer w-full max-w-xs">
+            <span className="block bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 text-center">
+              {policyFile ? "Change PDF File" : "Select PDF File"}
+            </span>
+            <input type="file" accept=".pdf" className="hidden" onChange={handlePolicyChange} />
+          </label>
+
+          {policyFile && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-lg animate-in fade-in duration-300">
+              <FileText className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-xs font-medium text-indigo-300 truncate max-w-[200px]">{policyFile.name}</span>
+              <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            </div>
+          )}
+
+          <button
+            onClick={handleExtractPolicy}
+            disabled={!policyFile || loadingPolicy}
+            className="w-full max-w-xs flex items-center justify-center gap-2 bg-white hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed text-black px-6 py-3 rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95"
+          >
+            {loadingPolicy ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Analyzing Document...</>
+            ) : (
+              <><ChevronRight className="w-4 h-4" /> Extract Clauses</>
             )}
-         </div>
+          </button>
 
-         <button 
-           onClick={handleExtractPolicy} 
-           disabled={!policyFile || loadingPolicy} 
-           className="w-full max-w-sm bg-indigo-600 text-white py-6 rounded-3xl font-black text-lg uppercase tracking-[0.3em] disabled:opacity-5 shadow-2xl shadow-indigo-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center italic hover-bounce"
-         >
-           {loadingPolicy ? (
-             <span className="flex items-center shimmer-bg px-8 py-2 rounded-xl">Analyzing Document...</span>
-           ) : (
-             <span className="flex items-center uppercase font-black not-italic tracking-widest">Extract Clauses <ChevronRight className="w-6 h-6 ml-2" /></span>
-           )}
-         </button>
-
-         {policyError && (
-           <div className="flex items-center space-x-2 text-red-500 bg-red-50 px-6 py-3 rounded-2xl border border-red-100 animate-in shake-in">
-              <AlertCircle className="w-4 h-4" />
-              <span className="text-xs font-black uppercase tracking-widest">{policyError}</span>
-           </div>
-         )}
+          {policyError && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <AlertCircle className="w-3.5 h-3.5 text-red-400" />
+              <span className="text-xs text-red-400">{policyError}</span>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Empty state */}
       {!loadingPolicy && clauses.length === 0 && policyFile && (
-        <div className="p-20 text-center space-y-4 opacity-50 empty-state-glow">
-           <FileText className="w-16 h-16 mx-auto text-gray-200" />
-           <p className="text-xs font-black uppercase tracking-widest text-gray-400 font-mono italic">Policy loaded. Extraction required to proceed.</p>
+        <div className="bg-[#111827] border border-white/5 rounded-xl p-10 text-center">
+          <FileText className="w-10 h-10 mx-auto text-gray-700 mb-3" />
+          <p className="text-xs text-gray-500">Policy loaded. Click Extract Clauses to proceed.</p>
         </div>
       )}
 
+      {/* Clauses */}
       {clauses.length > 0 && (
-        <div className="bg-white rounded-[40px] shadow-2xl shadow-gray-100/50 p-12 border border-blue-50 space-y-10 animate-scale-in">
-           <div className="flex items-center justify-between border-b border-gray-50 pb-8">
-              <h2 className="text-3xl font-black uppercase tracking-tighter italic">Extracted <span className="text-indigo-600">Clauses</span></h2>
-              <div className="success-badge">
-                 <CheckCircle2 className="w-4 h-4" />
-                 <span>{clauses.length} Rules extracted</span>
-              </div>
-           </div>
-           
-           <div className="grid grid-cols-1 gap-4">
-              {clauses.map((c, i) => (
-                <div key={i} className="group p-8 bg-gray-50 rounded-3xl border border-gray-100 hover:bg-white hover:border-indigo-100 hover:shadow-xl transition-all duration-300">
-                   <div className="flex items-start space-x-4">
-                      <div className="mt-1 flex items-center justify-center w-8 h-8 rounded-xl bg-white text-[10px] font-black text-indigo-500 border border-indigo-50 shadow-sm group-hover:bg-indigo-600 group-hover:text-white transition-colors">{i+1}</div>
-                      <p className="text-gray-600 leading-relaxed font-medium italic group-hover:text-black transition-colors">"{c}"</p>
-                   </div>
-                </div>
-              ))}
-           </div>
+        <div className="bg-[#111827] border border-white/5 rounded-xl overflow-hidden animate-in fade-in duration-500">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+            <div>
+              <h2 className="text-sm font-semibold text-white">Extracted Clauses</h2>
+              <p className="text-xs text-gray-500 mt-0.5">Showing {visibleClauses.length} of {clauses.length} rules</p>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span className="text-[10px] font-semibold text-emerald-400">{clauses.length} extracted</span>
+            </div>
+          </div>
 
-           <div className="flex justify-center pt-8">
-              <Link 
-                href="/dashboard/dataset-upload" 
-                className="bg-black text-white px-10 py-5 rounded-2xl font-black text-lg uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center shadow-xl shadow-black/10"
-              >
-                Continue to Dataset <ChevronRight className="w-6 h-6 ml-3" />
-              </Link>
-           </div>
+          {/* Clause list */}
+          <div className="overflow-y-auto max-h-[400px] p-4 space-y-2">
+            {visibleClauses.map((c, i) => (
+              <div key={i} className="flex items-start gap-3 p-4 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 rounded-lg transition-all group">
+                <span className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md bg-indigo-600/20 text-indigo-400 text-[10px] font-bold group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                  {i + 1}
+                </span>
+                <p className="text-xs text-gray-400 leading-relaxed group-hover:text-gray-200 transition-colors">"{c}"</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-t border-white/5">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] text-gray-500">Showing {visibleClauses.length} of {clauses.length} clauses</span>
+              {clauses.length > 10 && (
+                <button
+                  onClick={() => setShowAllClauses(prev => !prev)}
+                  className="text-[10px] font-semibold text-indigo-400 hover:text-indigo-300 px-3 py-1.5 border border-indigo-500/20 hover:border-indigo-500/40 rounded-lg transition-all"
+                >
+                  {showAllClauses ? "Show Less" : "View All Clauses"}
+                </button>
+              )}
+            </div>
+            <Link
+              href="/dashboard/dataset-upload"
+              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-all hover:scale-[1.02] active:scale-95"
+            >
+              Continue to Dataset <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       )}
     </div>

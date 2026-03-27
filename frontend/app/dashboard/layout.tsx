@@ -1,31 +1,37 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { DashboardProvider, useDashboard } from "@/lib/context/dashboard-context";
-import { 
-  BarChart3, 
-  FileText, 
-  FileSpreadsheet, 
-  Layers, 
-  ShieldCheck,
-  LayoutDashboard,
-  CheckCircle2, 
-  Lock, 
-  AlertCircle, 
-  RotateCcw 
+import {
+  LayoutDashboard, FileText, Database, Layers, ShieldCheck,
+  MessageSquare, FlaskConical, BarChart2,
+  CheckCircle2, Lock, AlertCircle, RotateCcw,
+  Search, Bell, User, ChevronRight, Menu, X
 } from "lucide-react";
 
-const navItems = [
-  { name: "Overview", href: "/dashboard", icon: LayoutDashboard, key: 'none' },
-  { name: "Policy Ingestion", href: "/dashboard/policy-upload", icon: FileText, key: 'policy' },
-  { name: "Dataset Upload", href: "/dashboard/dataset-upload", icon: FileSpreadsheet, key: 'dataset' },
-  { name: "Schema Mapping", href: "/dashboard/schema-mapping", icon: Layers, key: 'mapping' },
-  { name: "Compliance Report", href: "/dashboard/compliance-report", icon: ShieldCheck, key: 'report' },
+const sidebarSections = [
+  {
+    label: "Core Modules",
+    items: [
+      { name: "Dashboard",           href: "/dashboard",                   icon: LayoutDashboard, key: "none"    },
+      { name: "Policy Analysis",     href: "/dashboard/policy-upload",     icon: FileText,        key: "policy"  },
+      { name: "Dataset Validation",  href: "/dashboard/dataset-upload",    icon: Database,        key: "dataset" },
+      { name: "Schema Mapping",      href: "/dashboard/schema-mapping",    icon: Layers,          key: "mapping" },
+      { name: "Explainability",      href: "/dashboard/compliance-report", icon: ShieldCheck,     key: "report"  },
+    ],
+  },
+  {
+    label: "Advanced Features",
+    items: [
+      { name: "AI Chat",    href: "/dashboard/insights", icon: MessageSquare,  key: "free" },
+      { name: "Simulation", href: "/dashboard/insights", icon: FlaskConical,   key: "free" },
+      { name: "Insights",   href: "/dashboard/insights", icon: BarChart2,      key: "free" },
+    ],
+  },
 ];
 
-// Route Guard logic
 function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -57,104 +63,166 @@ function RouteGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function DashboardContent({ children }: { children: React.ReactNode }) {
+function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();
-  const { steps, policyState, datasetState, mappingState, reportState, resetPipeline } = useDashboard();
+  const { steps, resetPipeline } = useDashboard();
 
-  // Helper to determine if a route is enabled
-  const getRouteStatus = (key: string) => {
-    if (key === 'none' || key === 'policy') return { enabled: true, completed: key === 'policy' ? steps.policy : false };
-    if (key === 'dataset') return { enabled: steps.policy, completed: steps.dataset };
-    if (key === 'mapping') return { enabled: steps.dataset, completed: steps.mapping };
-    if (key === 'report') return { enabled: steps.mapping, completed: steps.report };
+  const getStatus = (key: string) => {
+    if (key === "free") return { enabled: true, completed: false };
+    if (key === "none" || key === "policy") return { enabled: true, completed: key === "policy" ? steps.policy : false };
+    if (key === "dataset") return { enabled: steps.policy, completed: steps.dataset };
+    if (key === "mapping")  return { enabled: steps.dataset, completed: steps.mapping };
+    if (key === "report")   return { enabled: steps.mapping, completed: steps.report };
     return { enabled: false, completed: false };
   };
 
+  return (
+    <>
+      {/* Mobile overlay */}
+      {open && <div className="fixed inset-0 bg-black/60 z-20 lg:hidden" onClick={onClose} />}
+
+      <aside className={`fixed top-0 left-0 h-full w-64 bg-[#0B0F19] border-r border-white/5 flex flex-col z-30 transition-transform duration-300
+        ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+
+        {/* Logo */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-white font-bold text-sm tracking-tight">ComplianceAI</span>
+          </Link>
+          <button onClick={onClose} className="lg:hidden text-gray-500 hover:text-white">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+          {sidebarSections.map((section) => (
+            <div key={section.label}>
+              <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                {section.label}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map((item) => {
+                  const { enabled, completed } = getStatus(item.key);
+                  const isActive = pathname === item.href && item.key !== "free";
+                  return (
+                    <Link
+                      key={item.name + item.href}
+                      href={enabled ? item.href : "#"}
+                      onClick={(e) => !enabled && e.preventDefault()}
+                      title={!enabled ? "Complete previous step to unlock" : ""}
+                      className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                        ${isActive
+                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+                          : !enabled
+                            ? "text-gray-600 cursor-not-allowed"
+                            : "text-gray-400 hover:bg-white/5 hover:text-white"
+                        }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon className={`w-4 h-4 ${isActive ? "text-white" : !enabled ? "text-gray-600" : "text-gray-500"}`} />
+                        {item.name}
+                      </div>
+                      {completed && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+                      {!enabled && <Lock className="w-3 h-3 text-gray-600" />}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+
+        {/* Footer */}
+        <div className="px-3 py-4 border-t border-white/5 space-y-3">
+          <button
+            onClick={resetPipeline}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium text-gray-500 hover:bg-red-500/10 hover:text-red-400 transition-all"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Reset Pipeline
+          </button>
+          <div className="flex items-center gap-2 px-3 py-2.5 bg-emerald-500/10 rounded-lg">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs text-emerald-400 font-medium">AI Node: Online</span>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+function Topbar({ onMenuClick }: { onMenuClick: () => void }) {
+  return (
+    <header className="fixed top-0 left-0 lg:left-64 right-0 h-14 bg-[#0B0F19]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 lg:px-6 z-10">
+      {/* Left */}
+      <div className="flex items-center gap-4">
+        <button onClick={onMenuClick} className="lg:hidden text-gray-400 hover:text-white">
+          <Menu className="w-5 h-5" />
+        </button>
+        <nav className="hidden md:flex items-center gap-1">
+          {["Platform", "Solutions", "Resources", "Pricing"].map((item) => (
+            <button key={item} className="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-all">
+              {item}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Right */}
+      <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5">
+          <Search className="w-3.5 h-3.5 text-gray-500" />
+          <input placeholder="Search..." className="bg-transparent text-xs text-gray-400 placeholder-gray-600 outline-none w-28" />
+        </div>
+        <button className="relative p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+          <Bell className="w-4 h-4" />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-indigo-500 rounded-full" />
+        </button>
+        <button className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+          <User className="w-4 h-4" />
+        </button>
+        <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition-all">
+          Request Demo
+          <ChevronRight className="w-3 h-3" />
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function DashboardContent({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const { policyState, datasetState, mappingState, reportState } = useDashboard();
   const currentError = policyState.error || datasetState.error || mappingState.error || reportState.error;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className="w-72 bg-white border-r border-gray-100 flex flex-col fixed h-full z-10 shadow-2xl shadow-gray-100/50">
-        <div className="p-10">
-          <Link href="/dashboard">
-            <h1 className="text-2xl font-black uppercase tracking-tighter italic group cursor-pointer">
-              Compliance<span className="text-indigo-600 transition-colors group-hover:text-black">AI</span>
-            </h1>
-          </Link>
-        </div>
-        
-        <nav className="flex-1 px-6 space-y-2">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            const { enabled, completed } = getRouteStatus(item.key);
-            
-            return (
-              <div key={item.href} className="relative group">
-                <Link
-                  href={enabled ? item.href : "#"}
-                  onClick={(e) => !enabled && e.preventDefault()}
-                  className={`flex items-center justify-between px-5 py-4 text-xs font-black uppercase tracking-[0.2em] rounded-[20px] transition-all duration-300 ${
-                    isActive 
-                      ? "bg-black text-white shadow-xl shadow-black/20 scale-[1.02]" 
-                      : !enabled 
-                        ? "opacity-30 grayscale cursor-not-allowed text-gray-400" 
-                        : "text-gray-400 hover:bg-gray-50 hover:text-black"
-                  }`}
-                  title={!enabled ? `Complete the previous step to unlock.` : ''}
-                >
-                  <div className="flex items-center">
-                    <item.icon className={`w-4 h-4 mr-4 ${isActive ? "text-indigo-400" : "text-gray-300"}`} />
-                    {item.name}
-                  </div>
-                  {completed && <CheckCircle2 className="w-4 h-4 text-green-500 animate-in zoom-in" />}
-                  {!enabled && <Lock className="w-3.5 h-3.5 text-gray-300" />}
-                </Link>
-              </div>
-            );
-          })}
-        </nav>
+    <div className="min-h-screen bg-[#0B0F19]">
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Topbar onMenuClick={() => setSidebarOpen(true)} />
 
-        <div className="p-8 space-y-4">
-           <button 
-             onClick={resetPipeline}
-             className="w-full flex items-center justify-center space-x-2 px-4 py-4 bg-gray-50 hover:bg-red-50 hover:text-red-600 text-gray-400 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-transparent hover:border-red-100"
-           >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset Pipeline</span>
-           </button>
-           <div className="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-50">
-              <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300 mb-1">Infrastructure</p>
-              <p className="text-xs font-bold text-indigo-700 flex items-center">
-                 <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />
-                 AI Node: Online
-              </p>
-           </div>
-        </div>
-      </aside>
+      <main className="lg:pl-64 pt-14 min-h-screen">
+        <div className="p-6 lg:p-8 max-w-6xl mx-auto" key={pathname}>
 
-      {/* Main Content */}
-      <main className="flex-1 ml-72 min-h-screen p-12">
-          <div className="max-w-5xl mx-auto space-y-12 page-transition" key={pathname}>
-            
-            {/* Global Error Handler */}
           {currentError && (
-            <div className="p-8 bg-red-50 border border-red-100 rounded-[32px] flex items-center justify-between animate-in slide-in-from-top-10 shadow-xl shadow-red-100/50">
-               <div className="flex items-center space-x-6">
-                  <div className="p-4 bg-white rounded-2xl shadow-sm">
-                     <AlertCircle className="w-8 h-8 text-red-500" />
-                  </div>
-                  <div className="space-y-1">
-                     <h4 className="text-xl font-black uppercase tracking-tight text-red-900 italic">Critical System Failure</h4>
-                     <p className="text-red-600 font-medium text-sm leading-relaxed">{currentError}</p>
-                  </div>
-               </div>
-               <button 
-                 onClick={() => window.location.reload()}
-                 className="px-8 py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-red-600/20"
-               >
-                  Retry Operation
-               </button>
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between animate-in slide-in-from-top-4 duration-300">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-red-400 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-red-400">Critical System Failure</p>
+                  <p className="text-xs text-red-400/70 mt-0.5">{currentError}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs font-semibold rounded-lg transition-all"
+              >
+                Retry
+              </button>
             </div>
           )}
 
@@ -170,9 +238,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <DashboardProvider>
-      <DashboardContent>
-        {children}
-      </DashboardContent>
+      <DashboardContent>{children}</DashboardContent>
     </DashboardProvider>
   );
 }
