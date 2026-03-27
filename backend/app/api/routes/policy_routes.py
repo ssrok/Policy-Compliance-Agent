@@ -109,6 +109,8 @@ async def extract_clauses_direct(file: UploadFile = File(...)):
     if not file or not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Please upload a valid PDF document.")
     
+    print("FILE RECEIVED:", file.filename)
+    
     try:
         # 1. Read the uploaded file into an in-memory byte stream
         file_content = await file.read()
@@ -122,15 +124,22 @@ async def extract_clauses_direct(file: UploadFile = File(...)):
                 if page_text:
                     extracted_text += page_text + "\n"
         
-        # 3. Process the text into clean clauses (split by newline, remove empty lines)
+        # 3. Handle empty text case
+        if not extracted_text:
+            print("EXTRACTED CLAUSES: []")
+            return {"clauses": []}
+        
+        # 4. Process the text into clean clauses (split by newline, remove empty lines)
         clauses = [
             line.strip() 
             for line in extracted_text.split("\n") 
             if line.strip()
         ]
         
+        print("EXTRACTED CLAUSES:", clauses)
         return {"clauses": clauses}
         
     except Exception as e:
-        logger.error(f"❌ PDF Extraction failed: {str(e)}")
-        raise HTTPException(status_code=400, detail=f"Failed to parse PDF: {str(e)}")
+        print(f"ERROR DURING EXTRACTION: {str(e)}")
+        # Fallback to empty list as requested for robustness
+        return {"clauses": []}
