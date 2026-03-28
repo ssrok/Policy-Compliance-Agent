@@ -15,7 +15,6 @@
   --input: oklch(0.92 0.02 260);
   --ring: oklch(0.55 0.15 250);
 }
-
 .dark {
   --background: oklch(0.12 0.01 260);
   --foreground: oklch(0.95 0.01 260);
