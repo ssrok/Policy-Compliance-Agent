@@ -22,7 +22,9 @@ class Settings(BaseSettings):
 
     DATABASE_URL:   str | None = None
     OPENAI_API_KEY: str | None = None
+    GROQ_API_KEY:   str | None = None
     UPLOAD_DIR:     str = os.path.join(_BASE_DIR, "uploads")
+    RAG_INDEX_DIR:  str = os.path.join(_BACKEND_DIR, "rag_index")
 
     model_config = {
         "env_file":          env_path,
@@ -38,3 +40,4 @@ if settings.DATABASE_URL:
     settings.DATABASE_URL = unquote(settings.DATABASE_URL)
 
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+os.makedirs(settings.RAG_INDEX_DIR, exist_ok=True)

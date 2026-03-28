@@ -6,9 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { DashboardProvider, useDashboard } from "@/lib/context/dashboard-context";
 import {
   LayoutDashboard, FileText, Database, Layers, ShieldCheck,
-  MessageSquare, FlaskConical, BarChart2,
+  MessageSquare, BarChart2,
   CheckCircle2, Lock, AlertCircle, RotateCcw,
-  Search, Bell, User, ChevronRight, Menu, X
+  Search, Bell, User, ChevronRight, Menu, X, BarChart3
 } from "lucide-react";
 
 const sidebarSections = [
@@ -25,9 +25,9 @@ const sidebarSections = [
   {
     label: "Advanced Features",
     items: [
-      { name: "AI Chat",    href: "/dashboard/insights", icon: MessageSquare,  key: "free" },
-      { name: "Simulation", href: "/dashboard/insights", icon: FlaskConical,   key: "free" },
-      { name: "Insights",   href: "/dashboard/insights", icon: BarChart2,      key: "free" },
+      { name: "AI Chat",  href: "/dashboard/chat",     icon: MessageSquare, key: "free" },
+      { name: "Insights", href: "/dashboard/insights", icon: BarChart2,      key: "free" },
+      { name: "Policy Simulation", href: "/dashboard/policy-simulation", icon: BarChart3, key: "free", isNew: true },
     ],
   },
 ];
@@ -107,27 +107,31 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
               <div className="space-y-0.5">
                 {section.items.map((item) => {
                   const { enabled, completed } = getStatus(item.key);
-                  const isActive = pathname === item.href && item.key !== "free";
+                  const isActive = pathname === item.href;
                   return (
                     <Link
                       key={item.name + item.href}
                       href={enabled ? item.href : "#"}
                       onClick={(e) => !enabled && e.preventDefault()}
                       title={!enabled ? "Complete previous step to unlock" : ""}
-                      className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                      className={`relative flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 overflow-hidden
                         ${isActive
-                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)] border border-indigo-400/30"
                           : !enabled
-                            ? "text-gray-600 cursor-not-allowed"
-                            : "text-gray-400 hover:bg-white/5 hover:text-white"
+                            ? "text-gray-600 cursor-not-allowed border border-transparent"
+                            : "text-gray-400 hover:bg-white/5 hover:text-white border border-transparent"
                         }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <item.icon className={`w-4 h-4 ${isActive ? "text-white" : !enabled ? "text-gray-600" : "text-gray-500"}`} />
-                        {item.name}
+                      <div className="flex items-center gap-3 relative z-10 w-full">
+                        {isActive && <div className="absolute -left-3 w-1 h-5 bg-white rounded-r-full shadow-[0_0_8px_white]" />}
+                        <item.icon className={`w-4 h-4 shrink-0 transition-all ${isActive ? "text-white ml-2" : !enabled ? "text-gray-600" : "text-gray-500"}`} />
+                        <span className="truncate flex-1">{item.name}</span>
+                        {(item as any).isNew && (
+                           <span className="text-[8px] font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.5 rounded flex-shrink-0 ml-1 leading-none shadow-[0_0_8px_rgba(16,185,129,0.2)]">New</span>
+                        )}
+                        {completed && !isActive && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 ml-auto" />}
+                        {!enabled && <Lock className="w-3 h-3 text-gray-600 shrink-0 ml-auto" />}
                       </div>
-                      {completed && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
-                      {!enabled && <Lock className="w-3 h-3 text-gray-600" />}
                     </Link>
                   );
                 })}

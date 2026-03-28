@@ -49,7 +49,22 @@ def get_application() -> FastAPI:
 
     from app.api.routes import report_routes
     app.include_router(report_routes.router, prefix=f"{settings.API_V1_STR}/report", tags=["report"])
+
+    from app.api.routes import chat_routes
+    app.include_router(chat_routes.router, prefix=settings.API_V1_STR, tags=["chat"])
     
+    from app.api.routes import session_routes
+    app.include_router(session_routes.router, prefix=f"{settings.API_V1_STR}/session", tags=["session"])
+
+    # ── Temporary DB health check ──────────────────────────────────────────────
+    from fastapi import Depends
+    from sqlalchemy.orm import Session
+    from app.api.deps import get_db
+
+    @app.get("/test-db")
+    def test_db(db: Session = Depends(get_db)):
+        return {"status": "db working"}
+
     return app
 
 app = get_application()

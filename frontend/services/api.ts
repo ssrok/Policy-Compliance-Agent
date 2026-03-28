@@ -1,4 +1,4 @@
-import { PolicyUploadResponse, PolicyProcessResponse } from "@/types";
+import { PolicyUploadResponse, PolicyProcessResponse, PolicyAnalyzeRequest, PolicyAnalyzeResponse } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
@@ -30,6 +30,19 @@ export const api = {
       throw new Error(errorData.detail || "Failed to process policy");
     }
 
+    return response.json();
+  },
+
+  analyzePolicy: async (body: PolicyAnalyzeRequest): Promise<PolicyAnalyzeResponse> => {
+    const response = await fetch(`${BASE_URL}/policy/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || "Policy analysis failed");
+    }
     return response.json();
   },
 };
