@@ -1,0 +1,48 @@
+{
+  "defaults": {
+    "request_timeout": 15,
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "html_parser": "html.parser"
+  },
+  "sources": [
+    {
+      "name": "RBI",
+      "url": "https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx",
+      "parser_strategy": "date_header_rows",
+      "item_selector": "table.tablebg tr",
+      "title_selector": "td a.link2",
+      "link_selector": "td a.link2",
+      "date_header_selector": "td.tableheader",
+      "date_selector": "",
+      "base_url": "https://www.rbi.org.in",
+      "request_timeout": 15,
+      "enabled": true
+    },
+    {
+      "name": "SEBI_Regulations",
+      "url": "https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=3&smid=0",
+      "parser_strategy": "inline_date_columns",
+      "item_selector": "table tr",
+      "title_selector": "td:nth-child(2) a",
+      "date_selector": "td:nth-child(1)",
+      "link_selector": "td:nth-child(2) a",
+      "date_header_selector": "",
+      "base_url": "https://www.sebi.gov.in",
+      "request_timeout": 15,
+      "enabled": true
+    },
+    {
+      "name": "SEBI_MasterCirculars",
+      "url": "https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=1&ssid=6&smid=0",
+      "parser_strategy": "inline_date_columns",
+      "item_selector": "table tr",
+      "title_selector": "td:nth-child(2) a",
+      "date_selector": "td:nth-child(1)",
+      "link_selector": "td:nth-child(2) a",
+      "date_header_selector": "",
+      "base_url": "https://www.sebi.gov.in",
+      "request_timeout": 15,
+      "enabled": true
+    }
+  ]
+}
